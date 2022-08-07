@@ -297,6 +297,53 @@ init_p256()
 del init_p256
 
 
+p256k1_names: list[str] = ["p256k1", "prime256k1", "secp256k1"]
+
+
+def init_p256k1():
+    p = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f
+    b = 0x7
+    order = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+    Gx = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
+    Gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
+
+    p256k1_modulus = long_to_bytes(p, 32)
+    p256k1_b = long_to_bytes(b, 32)
+    p256k1_order = long_to_bytes(order, 32)
+
+    ec_p256k1_context = VoidPointer()
+    result = _ec_lib.ec_ws_new_context(ec_p256k1_context.address_of(),
+                                       c_uint8_ptr(p256k1_modulus),
+                                       c_uint8_ptr(p256k1_b),
+                                       c_uint8_ptr(p256k1_order),
+                                       c_size_t(len(p256k1_modulus)),
+                                       c_ulonglong(getrandbits(64))
+                                       )
+    if result:
+        raise ImportError("Error %d initializing secp256k1 context" % result)
+
+    context = SmartPointer(ec_p256k1_context.get(), _ec_lib.ec_free_context)
+    p256k1 = _Curve(Integer(p),
+                  Integer(b),
+                  Integer(order),
+                  Integer(Gx),
+                  Integer(Gy),
+                  None,
+                  256,
+                  "1.3.132.0.10",  # ANSI X9.62 / SEC2 (OID)
+                  context,
+                  "Koblitz curve over 256-bit Prime field",
+                  "ecdsa-sha2-secp256k1",
+                  "secp256k1")
+
+    global p256k1_names
+    _curves.update(dict.fromkeys(p256k1_names, p256k1))
+
+
+init_p256k1()
+del init_p256k1
+
+
 p384_names = ["p384", "NIST P-384", "P-384", "prime384v1", "secp384r1",
               "nistp384"]
 
