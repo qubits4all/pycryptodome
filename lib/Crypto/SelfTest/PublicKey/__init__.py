@@ -26,7 +26,7 @@
 
 import unittest
 from Crypto.SelfTest.PublicKey import (test_DSA, test_RSA,
-                                       test_ECC_NIST, test_ECC_25519, test_ECC_448,
+                                       test_ECC_NIST, test_ECC_p256k1, test_ECC_25519, test_ECC_448,
                                        test_import_DSA, test_import_RSA,
                                        test_import_ECC, test_ElGamal)
 
@@ -36,6 +36,7 @@ def get_tests(config={}):
     tests += test_DSA.get_tests(config=config)
     tests += test_RSA.get_tests(config=config)
     tests += test_ECC_NIST.get_tests(config=config)
+    tests += test_ECC_p256k1.get_tests(config=config)
     tests += test_ECC_25519.get_tests(config=config)
     tests += test_ECC_448.get_tests(config=config)
 
