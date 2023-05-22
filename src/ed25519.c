@@ -64,8 +64,8 @@ STATIC void ed25519_add_internal(Point *P3, const Point *P1, const Point *P2)
 
     /* https://www.hyperelliptic.org/EFD/g1p/auto-twisted-extended-1.html#addition-add-2008-hwcd-3 */
 
-    sub32(A, P1->Y, P1->X);             /* (Y1-X1)      each limb < 2²⁷ */
-    sub32(B, P2->Y, P2->X);             /* (Y2-X2)      < 2²⁷ */
+    sub_25519(A, P1->Y, P1->X);         /* (Y1-X1)      each limb < 2²⁶ */
+    sub_25519(B, P2->Y, P2->X);         /* (Y2-X2)      < 2²⁶ */
     mul_25519(A, A, B);                 /* A            < 2²⁶ */
     add32(B, P1->Y, P1->X);             /* (Y1+X1)      < 2²⁷ */
     add32(C, P2->Y, P2->X);             /* (Y2+X2)      < 2²⁷ */
@@ -74,8 +74,8 @@ STATIC void ed25519_add_internal(Point *P3, const Point *P1, const Point *P2)
     mul_25519(C, C, k);                 /* C            < 2²⁶ */
     mul_25519(D, P1->Z, P2->Z);         /* Z1*Z2        < 2²⁶ */
     add_25519(D, D, D);                 /* D            < 2²⁶ */
-    sub32(P3->T, B, A);                 /* E=B-A        < 2²⁷ */
-    sub32(P3->Z, D, C);                 /* F=D-C        < 2²⁷ */
+    sub_25519(P3->T, B, A);             /* E=B-A        < 2²⁶ */
+    sub_25519(P3->Z, D, C);             /* F=D-C        < 2²⁶ */
     add32(D, D, C);                     /* G=D+C        < 2²⁷ */
     add32(B, B, A);                     /* H=B+A        < 2²⁷ */
     mul_25519(P3->X, P3->T, P3->Z);     /* X3=E*F       < 2²⁶ */
@@ -95,8 +95,8 @@ STATIC void ed25519_double_internal(Point *P3, const Point *P1)
     add32(D, A, B);                     /* H=A+B            < 2²⁷ */
     add32(P3->T, P1->X, P1->Y);         /* X1+Y1            < 2²⁷ */
     mul_25519(P3->T, P3->T, P3->T);     /* (X1+Y1)^2        < 2²⁶ */
-    sub32(P3->T, D, P3->T);             /* E=H-(X1+Y1)^2    < 2²⁷ */
-    sub32(P3->Z, A, B);                 /* G=A-B            < 2²⁷ */
+    sub_25519(P3->T, D, P3->T);         /* E=H-(X1+Y1)^2    < 2²⁶ */
+    sub_25519(P3->Z, A, B);             /* G=A-B            < 2²⁶ */
     add_25519(A, C, P3->Z);             /* F=C+G            < 2²⁶ */
     mul_25519(P3->X, P3->T, A);         /* X3=E*F           < 2²⁶ */
     mul_25519(P3->Y, P3->Z, D);         /* Y3=G*H           < 2²⁶ */
@@ -258,13 +258,14 @@ EXPORT_SYM int ed25519_cmp(const Point *p1, const Point *p2)
 {
     uint32_t tmp[10];
     uint8_t bin1[32], bin2[32];
+    unsigned int i;
     int res = 0;
 
     mul_25519(tmp, p1->X, p2->Z);
     convert_le25p5_to_le8(bin1, tmp);
     mul_25519(tmp, p2->X, p1->Z);
     convert_le25p5_to_le8(bin2, tmp);
-    for (unsigned i=0; i<sizeof bin1; i++) {
+    for (i=0; i<sizeof bin1; i++) {
         res |= bin1[i] != bin2[i];
     }
 
@@ -272,7 +273,7 @@ EXPORT_SYM int ed25519_cmp(const Point *p1, const Point *p2)
     convert_le25p5_to_le8(bin1, tmp);
     mul_25519(tmp, p2->Y, p1->Z);
     convert_le25p5_to_le8(bin2, tmp);
-    for (unsigned i=0; i<sizeof bin1; i++) {
+    for (i=0; i<sizeof bin1; i++) {
         res |= bin1[i] != bin2[i];
     }
 
@@ -283,8 +284,7 @@ EXPORT_SYM int ed25519_neg(Point *p)
 {
     const uint32_t zero[10] = { 0 };
 
-    sub32(p->X, zero, p->X);
-    reduce_25519_le25p5(p->X);
+    sub_25519(p->X, zero, p->X);
     return 0;
 }
 
@@ -322,7 +322,7 @@ EXPORT_SYM int ed25519_add(Point *P1, const Point *P2)
     return 0;
 }
 
-EXPORT_SYM int ed25519_scalar(Point *P, uint8_t *scalar, size_t scalar_len, uint64_t seed)
+EXPORT_SYM int ed25519_scalar(Point *P, const uint8_t *scalar, size_t scalar_len, uint64_t seed)
 {
     if ((NULL == P) || (NULL == scalar))
         return ERR_NULL;

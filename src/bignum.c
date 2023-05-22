@@ -154,7 +154,7 @@ STATIC void product(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, const 
  * @param words The number of words of a, b, and out
  * @return      0 for success, the appropriate code otherwise.
  */
-STATIC FUNC_SSE2 int mod_select(uint64_t *out, const uint64_t *a, const uint64_t *b, unsigned cond, size_t words)
+STATIC int mod_select(uint64_t *out, const uint64_t *a, const uint64_t *b, unsigned cond, size_t words)
 {
     uint64_t mask;
 #if defined(USE_SSE2)
@@ -164,7 +164,7 @@ STATIC FUNC_SSE2 int mod_select(uint64_t *out, const uint64_t *a, const uint64_t
     pairs = (unsigned)words / 2;
     mask = (uint64_t)((cond != 0) - 1); /* 0 for a, 1s for b */
 
-#if SYSBITS == 64
+#if SYS_BITS == 64
     r0 = _mm_set1_epi64x(mask);
 #else
     r0 = _mm_loadl_epi64((__m128i*)&mask);

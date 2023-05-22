@@ -312,7 +312,7 @@ STATIC void mont_mult_p256(uint64_t *out, const uint64_t *a, const uint64_t *b, 
         k = t[i];
 
         /* n[0] = 2⁶⁴ - 1 */
-        prod_lo = -k;
+        prod_lo = (uint64_t)(0 - k);
         prod_hi = k - (k!=0);
         t[i+0] += prod_lo;
         prod_hi += t[i+0] < prod_lo;
@@ -474,7 +474,7 @@ STATIC void mont_mult_p384(uint64_t *out, const uint64_t *a, const uint64_t *b, 
         uint64_t prod_lo, prod_hi;
 
         k = t[i] + (t[i] << 32);
-        k2_lo = -k;
+        k2_lo = (uint64_t)(0 - k);
         k2_hi = k - (k!=0);
 
         /* n[0] = 2³² - 1 */
@@ -628,7 +628,7 @@ STATIC void mont_mult_ed448(uint64_t *out, const uint64_t *a, const uint64_t *b,
         uint64_t prod_lo, prod_hi;
 
         k = t[i];
-        k2_lo = -k;
+        k2_lo = (uint64_t)(0 - k);
         k2_hi = k - (k!=0);
 
         /* n[0] = 2⁶⁴ - 1 */
@@ -1047,7 +1047,7 @@ cleanup:
 }
 
 /*
- * Assign a value to a number in Montgomer form.
+ * Assign a value to a number in Montgomery form.
  *
  * @param out   The location where the result is stored at; it must have been created with mont_number(&p,1,ctx).
  * @param x     The value to set.
@@ -1123,10 +1123,32 @@ static int cmp_modulus(const uint8_t *mod1, size_t mod1_len, const uint8_t *mod2
  */
 int mont_context_init(MontContext **out, const uint8_t *modulus, size_t mod_len)
 {
-    const uint8_t p256_mod[32] = "\xff\xff\xff\xff\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff";
-    const uint8_t p384_mod[48] = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff";
-    const uint8_t p521_mod[66] = "\x01\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff";
-    const uint8_t ed448_mod[56] = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff";
+    const uint8_t p256_mod[32] = {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x01,
+                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                  0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    const uint8_t p384_mod[48] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+                                  0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF};
+    const uint8_t p521_mod[66] = {0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0xFF};
+    const uint8_t ed448_mod[56] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                   0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFF,
+                                   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     uint64_t *scratchpad = NULL;
     MontContext *ctx;
     int res;

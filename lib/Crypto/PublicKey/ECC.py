@@ -101,7 +101,7 @@ int ed25519_neg(Point *p);
 int ed25519_get_xy(uint8_t *xb, uint8_t *yb, size_t modsize, Point *p);
 int ed25519_double(Point *p);
 int ed25519_add(Point *P1, const Point *P2);
-int ed25519_scalar(Point *P, uint8_t *scalar, size_t scalar_len, uint64_t seed);
+int ed25519_scalar(Point *P, const uint8_t *scalar, size_t scalar_len, uint64_t seed);
 """)
 
 _ed448_lib = load_pycryptodome_raw_lib("Crypto.PublicKey._ed448", """
@@ -581,6 +581,9 @@ class EccPoint(object):
         return self
 
     def __eq__(self, point):
+        if not isinstance(point, EccPoint):
+            return False
+
         cmp_func = lib_func(self, "cmp")
         return 0 == cmp_func(self._point.get(), point._point.get())
 
@@ -800,7 +803,7 @@ class EccKey(object):
         if curve_name not in _curves:
             raise ValueError("Unsupported curve (%s)" % curve_name)
         self._curve = _curves[curve_name]
-        self.curve = curve_name
+        self.curve = self._curve.desc
 
         count = int(self._d is not None) + int(self._seed is not None)
 
@@ -848,6 +851,9 @@ class EccKey(object):
         return self._curve.desc in ("Ed25519", "Ed448")
 
     def __eq__(self, other):
+        if not isinstance(other, EccKey):
+            return False
+
         if other.has_private() != self.has_private():
             return False
 
@@ -856,7 +862,7 @@ class EccKey(object):
     def __repr__(self):
         if self.has_private():
             if self._is_eddsa():
-                extra = ", seed=%s" % self._seed.hex()
+                extra = ", seed=%s" % tostr(binascii.hexlify(self._seed))
             else:
                 extra = ", d=%d" % int(self._d)
         else:
@@ -1437,8 +1443,8 @@ def _import_rfc5915_der(encoded, passphrase, curve_oid=None):
     d = Integer.from_bytes(scalar_bytes)
 
     # Decode public key (if any)
-    if len(private_key) == 4:
-        public_key_enc = DerBitString(explicit=1).decode(private_key[3]).value
+    if len(private_key) > 2:
+        public_key_enc = DerBitString(explicit=1).decode(private_key[-1]).value
         public_key = _import_public_der(public_key_enc, curve_oid=curve_oid)
         point_x = public_key.pointQ.x
         point_y = public_key.pointQ.y

@@ -105,13 +105,13 @@ class TestEccPoint_Ed448(unittest.TestCase):
 
     def test_pai(self):
         pai = EccPoint(0, 1, curve="Ed448")
-        self.failUnless(pai.is_point_at_infinity())
+        self.assertTrue(pai.is_point_at_infinity())
         self.assertEqual(pai, pai.point_at_infinity())
 
     def test_negate(self):
         negG = -self.pointG
         sum = self.pointG + negG
-        self.failUnless(sum.is_point_at_infinity())
+        self.assertTrue(sum.is_point_at_infinity())
 
     def test_addition(self):
         self.assertEqual(self.pointG + self.pointG2, self.pointG3)
@@ -257,6 +257,12 @@ class TestEccKey_Ed448(unittest.TestCase):
         self.assertNotEqual(public_key, public_key3)
 
         self.assertNotEqual(public_key, private_key)
+
+    def test_name_consistency(self):
+        key = ECC.generate(curve='ed448')
+        self.assertIn("curve='Ed448'", repr(key))
+        self.assertEqual(key.curve, 'Ed448')
+        self.assertEqual(key.public_key().curve, 'Ed448')
 
 
 class TestEccModule_Ed448(unittest.TestCase):

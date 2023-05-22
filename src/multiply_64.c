@@ -38,7 +38,7 @@
 /**
  * Add a 64-bit value x to y/sum_mid/sum_hi
  */
-#if defined(_WIN64) && (_MSC_VER>=1900)
+#if defined(_MSC_VER) && (_MSC_VER>=1900) && (defined(_M_X64) || defined(__x86_64__))
 
 #include <intrin.h>
 #define ADD192(y, x) do {           \
@@ -59,7 +59,7 @@
 
 #endif
 
-void inline addmul128(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, uint64_t b0, uint64_t b1, size_t t_words, size_t a_nw)
+void addmul128(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, uint64_t b0, uint64_t b1, size_t t_words, size_t a_nw)
 {
     uint64_t sum_low, sum_mid, sum_hi;
     uint64_t pr_low, pr_high, aim1;
@@ -195,7 +195,7 @@ void inline addmul128(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, uint
 }
 
 
-void inline square(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, size_t nw)
+void square(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, size_t nw)
 {
     size_t i, j;
     uint64_t carry;

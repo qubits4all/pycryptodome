@@ -75,9 +75,16 @@ typedef unsigned __int64 uint64_t;
 #define UINT32_MAX 0xFFFFFFFFUL
 #endif
 
+#ifndef UINT64_MAX
+#define UINT64_MAX 0xFFFFFFFFFFFFFFFFUL
+#endif
+
 #endif /* HAVE_STDINT_H */
 
 #ifdef _MSC_VER
+
+/** Fix for warning C4668 **/
+#define WIN32_LEAN_AND_MEAN
 
 #define inline _inline
 #define RESTRICT __restrict
@@ -109,15 +116,17 @@ typedef unsigned __int64 uint64_t;
 /*
  * On Windows, distutils expects that a CPython module always exports the symbol init${MODNAME}
  */
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#include <Python.h>
-#if PY_MAJOR_VERSION >= 3
-#define FAKE_INIT(x) PyMODINIT_FUNC _PASTE2(PyInit__,x) (void) { return NULL; }
+#if defined(NO_CPYTHON_MODULE)
+ #define FAKE_INIT(x)
+#elif defined(_MSC_VER) || defined(__MINGW32__)
+ #include <Python.h>
+ #if PY_MAJOR_VERSION >= 3
+  #define FAKE_INIT(x) PyMODINIT_FUNC _PASTE2(PyInit__,x) (void) { return NULL; }
+ #else
+  #define FAKE_INIT(x) PyMODINIT_FUNC _PASTE2(init_,x) (void) { return; }
+ #endif
 #else
-#define FAKE_INIT(x) PyMODINIT_FUNC _PASTE2(init_,x) (void) { return; }
-#endif
-#else
-#define FAKE_INIT(x)
+ #define FAKE_INIT(x)
 #endif
 
 /*
@@ -191,17 +200,5 @@ static inline const uint8_t* memchr_not(const uint8_t* s, int c, size_t n)
             return s;
     return NULL;
 }
-
-/*
- * On 32-bit x86 platforms, gcc assumes the stack to be aligned to 16
- * bytes, but the caller may actually only align it to 4 bytes, which
- * make functions crash if they use SSE2 intrinsics.
- * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=40838
- */
-#if defined(GCC_REALIGN)
-#define FUNC_SSE2 __attribute__((force_align_arg_pointer))
-#else
-#define FUNC_SSE2
-#endif
 
 #endif

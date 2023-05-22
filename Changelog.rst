@@ -1,12 +1,71 @@
 Changelog
 =========
 
-3.16.0 (xx xx 2022)
+3.18.0 (18 May 2023)
 ++++++++++++++++++++++++++
+
+New features
+---------------
+* Added support for DER BOOLEAN encodings.
+* The library now compiles on Windows ARM64. Thanks to Niyas Sait.
+
+Resolved issues
+---------------
+* GH#722: ``nonce`` attribute was not correctly set for XChaCha20_Poly1305 ciphers. Thanks to Liam Haber.
+* GH#728: Workaround for a possible x86 emulator bug in Windows for ARM64.
+* GH#739: OID encoding for arc 2 didn't accept children larger than 39. Thanks to James.
+* Correctly check that the scalar matches the point when importing an ECC private key.
+
+3.17.0 (29 January 2023)
+++++++++++++++++++++++++++
+
+New features
+---------------
+* Added support for the Counter Mode KDF defined in SP 800-108 Rev 1.
+* Reduce the minimum tag length for the EAX cipher to 2 bytes.
+* An RSA object has 4 new properties for the CRT coefficients:
+  ``dp``, ``dq``, ``invq`` and ``invq`` (``invp`` is the same value
+  as the existing ``u``).
+
+Resolved issues
+---------------
+* GH#526: improved typing for ``RSA.construct``.
+* GH#534: reduced memory consumption when using a large number
+  of cipher objects.
+* GH#598: fixed missing error handling for ``Util.number.inverse``.
+* GH#629: improved typing for ``AES.new`` and the various
+  mode-specific types it returns. Thanks to Greg Werbin.
+* GH#653: added workaround for an alleged GCC compiler bug
+  that affected Ed25519 code compiled for AVX2.
+* GH#658: attribute ``curve`` of an ECC key was not always
+  the preferred curve name, as it used to be in v3.15.0
+  (independently of the curve name specified when generating
+  the key).
+* GH#637: fixed typing for legacy modules ``PKCS1_v1_5`` and ``PKCS1_PSS``,
+  as their ``verify()`` returned a boolean.
+* GH#664: with OCB mode, nonces of maximum length (15 bytes)
+  were actually used as 14 bytes nonces.
+  After this fix, data that was encrypted in past using the
+  (default) nonce length of 15 bytes can still be decrypted
+  by reducing the nonce to its first 14 bytes.
+* GH#705: improved typing for ``nonce``, ``iv``, and ``IV`` parameters
+  of cipher objects.
+
+Other changes
+-------------
+* Build PyPy wheels only for versions 3.8 and 3.9, and not for 3.7 anymore.
+
+3.16.0 (26 November 2022)
+++++++++++++++++++++++++++
+
+New features
+------------
+* Build wheels for musl Linux. Thanks to Ben Raz.
 
 Resolved issues
 ---------------
 * GH#639: ARC4 now also works with 'keys' as short as 8 bits.
+* GH#669: fix segfaults when running in a manylinux2010 i686 image.
 
 3.15.0 (22 June 2022)
 ++++++++++++++++++++++++++

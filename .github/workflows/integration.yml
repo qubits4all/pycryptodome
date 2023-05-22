@@ -7,45 +7,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8, 3.9, "3.10" ]
+        python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8, 3.9, "3.10", "3.11" ]
         cffi: [ yes, no ]
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-20.04 ]
         include:
           - python-version: 2.7
             cffi: no
-            os: macos-10.15
+            os: macos-12
           - python-version: 2.7
             cffi: yes
-            os: macos-10.15
-          - python-version: "3.10"
+            os: macos-12
+          - python-version: "3.11"
             cffi: yes
-            os: macos-10.15
+            os: macos-12
           - python-version: 2.7
             cffi: no
             os: windows-latest
           - python-version: 2.7
             cffi: yes
             os: windows-latest
-          - python-version: "3.10"
+          - python-version: "3.11"
             cffi: no
             os: windows-latest
-          - python-version: "3.10"
+          - python-version: "3.11"
             cffi: yes
             os: windows-latest
-          - python-version: pypy2
+          - python-version: pypy2.7
             cffi: no
             os: ubuntu-latest
-          - python-version: pypy3
+          - python-version: pypy3.8
             cffi: no
             os: ubuntu-latest
     env:
       CFLAGS: "-Wconversion"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -58,7 +58,7 @@ jobs:
 
     - name: Install MSVC
       if: matrix.os == 'windows-latest' && matrix.python-version == '2.7'
-      uses: ilammy/msvc-dev-cmd@f456b805b3f63911738cb71d4f255e4e129c7e7a
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Prepare environmental variables
       if: matrix.os == 'windows-latest' && matrix.python-version == '2.7'
@@ -78,11 +78,11 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
+        python-version: "3.x"
     - name: Install dependencies
       run: |
         pip install mypy pycryptodome-test-vectors
@@ -90,34 +90,48 @@ jobs:
       run: |
         mypy lib/
 
-  test_c:
+  test_c_linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sse: [0, 1]
+        arch: [x64, x32]
     steps:
-    - uses: actions/checkout@v2
-    - name: Test
-      run: |
-        cd src/test
-        make
-
-  test_c_i386:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install libc6-dev-i386
-    - name: Test
+    - name: Test Linux x32 and x64
       run: |
         cd src/test
-        CFLAGS="-m32" UNDEFS="-UHAVE_UINT128" make
+        mkdir build
+        GCC_M32_TOOLCHAIN=${{ github.workspace }}/.github/workflows/gcc_m32_toolchain.txt
+        EXTRA=$([ ${{ matrix.arch }} = x32 ] && echo "-DCMAKE_TOOLCHAIN_FILE=$GCC_M32_TOOLCHAIN" || true)
+        cmake -B build -DSSE=${{ matrix.sse }} $EXTRA
+        make -C build all test
 
-  test_c_sse2:
-    runs-on: ubuntu-latest
+  test_c_windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch:
+          - x64
+          - win32
     steps:
-    - uses: actions/checkout@v2
-    - name: Test
+    - uses: actions/checkout@v3
+    - name: Set up Python "3.11"
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - name: Install MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ matrix.arch }}
+    - name: Test Windows 32 and 64
       run: |
         cd src/test
-        CPPFLAGS="-DHAVE_X86INTRIN_H" make
-
+        mkdir build
+        cmake -B build -G "NMake Makefiles"
+        cd build
+        nmake all test

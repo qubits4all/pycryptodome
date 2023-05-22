@@ -50,7 +50,7 @@
  * Multiply a vector a[] by a scalar b. Add the result into vector t[],
  * starting at the given offset.
  */
-void static inline FUNC_SSE2 addmul32(uint32_t* t, size_t offset, const uint32_t *a, uint32_t b, size_t t_words, size_t a_words)
+void static inline addmul32(uint32_t* t, size_t offset, const uint32_t *a, uint32_t b, size_t t_words, size_t a_words)
 {
     uint32_t carry;
     size_t i;
@@ -132,7 +132,7 @@ void static inline FUNC_SSE2 addmul32(uint32_t* t, size_t offset, const uint32_t
  * t[] and a[] are little-endian.
  * Return the number of 64-bit words that we wrote into t[]
  */
-void inline addmul128(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, uint64_t b0, uint64_t b1, size_t t_nw, size_t a_nw)
+void addmul128(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, uint64_t b0, uint64_t b1, size_t t_nw, size_t a_nw)
 {
     uint32_t b0l, b0h, b1l, b1h;
     uint32_t *t32, *a32;
@@ -249,7 +249,7 @@ void static inline square_32(uint32_t *t, const uint32_t *a, size_t nw)
     assert(carry == 0);
 }
 
-void inline square(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, size_t nw)
+void square(uint64_t *t, uint64_t *scratchpad, const uint64_t *a, size_t nw)
 {
     uint32_t *t32, *a32;
 #ifndef PYCRYPTO_LITTLE_ENDIAN

@@ -1,6 +1,12 @@
 .. image:: https://github.com/Legrandin/pycryptodome/workflows/Integration%20test/badge.svg?branch=master
    :target: https://github.com/Legrandin/pycryptodome/actions
 
+.. image:: https://badge.fury.io/py/pycryptodome.svg
+   :target: https://pypi.org/project/pycryptodome
+
+.. image:: https://badge.fury.io/py/pycryptodomex.svg
+   :target: https://pypi.org/project/pycryptodomex
+
 PyCryptodome
 ============
 
@@ -58,7 +64,7 @@ with respect to the last official version of PyCrypto (2.6.1):
 * Salsa20 and ChaCha20/XChaCha20 stream ciphers
 * Poly1305 MAC
 * ChaCha20-Poly1305 and XChaCha20-Poly1305 authenticated ciphers
-* scrypt, bcrypt and HKDF derivation functions
+* scrypt, bcrypt, HKDF, and NIST SP 800 108r1 Counter Mode key derivation functions
 * Deterministic (EC)DSA and EdDSA
 * Password-protected PKCS#8 key containers
 * Shamir's Secret Sharing scheme
