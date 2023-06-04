@@ -302,7 +302,7 @@ p256k1_names: list[str] = ["p256k1", "prime256k1", "secp256k1"]
 
 def init_p256k1():
     p = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f
-    b = 0x7
+    b = 0x0000000000000000000000000000000000000000000000000000000000000007
     order = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
     Gx = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
     Gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
@@ -737,6 +737,11 @@ p521_G = EccPoint(_curves['p521'].Gx, _curves['p521'].Gy, "p521")
 p521 = _curves['p521']._replace(G=p521_G)
 _curves.update(dict.fromkeys(p521_names, p521))
 del p521_G, p521, p521_names
+
+p256k1_G = EccPoint(_curves['secp256k1'].Gx, _curves['secp256k1'].Gy, "secp256k1")
+p256k1 = _curves['secp256k1']._replace(G=p256k1_G)
+_curves.update(dict.fromkeys(p256k1_names, p256k1))
+del p256k1_G, p256k1, p256k1_names
 
 ed25519_G = EccPoint(_curves['Ed25519'].Gx, _curves['Ed25519'].Gy, "Ed25519")
 ed25519 = _curves['Ed25519']._replace(G=ed25519_G)
