@@ -264,11 +264,18 @@ class NISTExampleTestVectors(unittest.TestCase):
     def runTest(self):
 
         for data, custom, digest, text, module in self.test_data:
-            hd = module.new(custom=custom, digest_bytes=len(digest))
-            for string in data:
-                hd.update(string)
-            self.assertEqual(hd.digest(), digest, msg=text)
+            hd1 = module.new(custom=custom, digest_bytes=len(digest))
+            hd2 = module.new(custom=custom, digest_bytes=len(digest))
 
+            # Call update() for each element
+            for string in data:
+                hd1.update(string)
+
+            # One single update for all elements
+            hd2.update(*data)
+
+            self.assertEqual(hd1.digest(), digest, msg=text)
+            self.assertEqual(hd2.digest(), digest, msg=text)
 
 def get_tests(config={}):
     tests = []

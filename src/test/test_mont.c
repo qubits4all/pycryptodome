@@ -5,7 +5,7 @@
 int ge(const uint64_t *x, const uint64_t *y, size_t nw);
 unsigned sub(uint64_t *out, const uint64_t *a, const uint64_t *b, size_t nw);
 void rsquare(uint64_t *r2, uint64_t *n, size_t nw);
-int mod_select(uint64_t *out, const uint64_t *a, const uint64_t *b, unsigned cond, unsigned words);
+int mod_select(uint64_t *out, const uint64_t *a, const uint64_t *b, unsigned cond, size_t words);
 
 void test_ge(void)
 {
@@ -424,6 +424,8 @@ void test_mod_select(void)
     res = mod_select(f, d, e, 0, ctx->words);
     assert(res == 0);
     assert(memcmp(e, f, sizeof f) == 0);
+
+    mont_context_free(ctx);
 }
 
 int main(void) {

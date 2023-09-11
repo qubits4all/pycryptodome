@@ -1,6 +1,16 @@
 Changelog
 =========
 
+3.19.0 (under development)
+++++++++++++++++++++++++++
+
+New features
+---------------
+* The ``update()`` methods of TupleHash128 and TupleHash256 hash objects
+  can now hash multiple items (byte strings) at once.
+  Thanks to Sylvain Pelissier.
+* Added support for ECDH, with ``Crypto.Protocol.dh``.
+
 3.18.0 (18 May 2023)
 ++++++++++++++++++++++++++
 
